@@ -1,4 +1,4 @@
-use super::schema::apis;
+use super::schema::{apis, endpoints, contents, allows};
 
 #[derive(Queryable)]
 pub struct Api {
