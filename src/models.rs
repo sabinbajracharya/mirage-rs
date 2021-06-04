@@ -1,3 +1,4 @@
+use actix_web::{web};
 use diesel::prelude::*;
 use diesel::result::Error;
 use serde::{Deserialize, Serialize};
@@ -35,26 +36,31 @@ pub struct NewEndpoint {
 }
 
 impl Endpoint {
-    pub fn create(endpoint: NewEndpoint) -> Result<&'static str, Error> {
+    pub async fn create(endpoint: NewEndpoint) -> Result<String, Error> {
 
         let conn = connection().unwrap();
         let endpoint = NewEndpoint::from(endpoint);
 
-        diesel::insert_into(endpoints::table)
+        let result = web::block(move || {
+            diesel::insert_into(endpoints::table)
             .values(&endpoint)
-            .execute(&conn)?;
+            .execute(&conn)
+        }).await
+        .expect("Error inserting the endpoint!");
 
-        Ok("Inserted 1 row.")
+        Ok(format!("Inserted {} row in the db!", result))
     }
 
-    pub fn find_all() -> Result<Vec<Endpoint>, Error> {
+    pub async fn find_all() -> Result<Vec<Endpoint>, Error> {
         use schema::endpoints::dsl::*;
 
         let conn = connection().unwrap();
 
-        let results = endpoints
-            .load::<Endpoint>(&conn)
-            .expect("Error loading endpoints");
+        let results = web::block(move || {
+            endpoints
+                .load::<Endpoint>(&conn)
+        }).await
+        .expect("Error loading endpoints");
 
         Ok(results)
     }

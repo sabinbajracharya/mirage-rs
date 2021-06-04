@@ -5,13 +5,13 @@ use crate::models::{Endpoint, NewEndpoint};
 
 #[post("/endpoint")]
 async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> impl Responder {
-    let new_endpoint = Endpoint::create(endpoint.into_inner()).unwrap();
+    let new_endpoint = Endpoint::create(endpoint.into_inner()).await.unwrap();
     HttpResponse::Ok().json(new_endpoint)
 }
 
 #[get("/endpoints")]
 async fn get_all_endpoints() -> impl Responder {
-    let endpoints = Endpoint::find_all().unwrap();
+    let endpoints = Endpoint::find_all().await.unwrap();
     HttpResponse::Ok().json(endpoints)
 }
 
