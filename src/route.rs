@@ -1,52 +1,21 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
-use diesel::prelude::*;
+use serde_json::json;
 
-use crate::models::{Api, NewApi};
-use crate::schema;
-use crate::db::connection;
+use crate::models::{Endpoint, NewEndpoint};
 
-#[get("/")]
-async fn hello() -> impl Responder {
-	use schema::apis::dsl::*;
-
-	let connection = connection().unwrap();
-
-	let results = apis
-        .limit(5)
-        .load::<Api>(&connection)
-        .expect("Error loading posts");
-
-    println!("Displaying {} posts", results.len());
-    for api in results {
-        println!("{}", api.status_code);
-        println!("----------\n");
-        println!("{}", api.body);
-    }
-
-	HttpResponse::Ok().body("Hello world II!")
+#[post("/endpoint")]
+async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> impl Responder {
+    let new_endpoint = Endpoint::create(endpoint.into_inner()).unwrap();
+    HttpResponse::Ok().json(new_endpoint)
 }
 
-#[get("/insert")]
-async fn insert() -> impl Responder {
-	let conn = connection().unwrap();
-
-	use schema::apis;
-
-    let new_api = NewApi {
-		pid: &123,
-		body: "A body from 3rd dimension",
-		status_code: &200
-	};
-
-    diesel::insert_into(apis::table)
-        .values(&new_api)
-        .execute(&conn)
-        .expect("Error saving new post");
-
-	HttpResponse::Ok().body("Inserting dummy content!")
+#[get("/endpoints")]
+async fn get_all_endpoints() -> impl Responder {
+    let endpoints = Endpoint::find_all().unwrap();
+    HttpResponse::Ok().json(endpoints)
 }
 
 pub fn init_routes(config: &mut web::ServiceConfig) {
-	config.service(hello);
-	config.service(insert);
+    config.service(insert_endpoint);
+    config.service(get_all_endpoints);
 }
