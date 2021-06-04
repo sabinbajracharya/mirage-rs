@@ -1,0 +1,6 @@
+CREATE TABLE apis (
+  id INTEGER NOT NULL PRIMARY KEY,
+  pid INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  status_code INTEGER NOT NULL
+)
