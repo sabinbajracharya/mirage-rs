@@ -14,6 +14,7 @@ mod route;
 mod models;
 mod schema;
 mod db;
+mod error_handler;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
