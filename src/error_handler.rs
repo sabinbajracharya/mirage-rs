@@ -29,17 +29,17 @@ impl fmt::Display for CustomError {
 
 impl From<BlockingError<DieselError>> for CustomError {
   fn from(error: BlockingError<DieselError>) -> CustomError {
-      match error {
-        BlockingError::Canceled => CustomError::new(400, "The request was canceled.".to_string()),
-        BlockingError::Error(diesel_error) => match diesel_error {
-            DieselError::DatabaseError(_, err) => CustomError::new(409, err.message().to_string()),
-            DieselError::NotFound => {
-                CustomError::new(404, "The record was not found".to_string())
+        match error {
+            BlockingError::Canceled => CustomError::new(400, "The request was canceled.".to_string()),
+            BlockingError::Error(diesel_error) => match diesel_error {
+                DieselError::DatabaseError(_, err) => CustomError::new(409, err.message().to_string()),
+                DieselError::NotFound => {
+                    CustomError::new(404, "The record was not found".to_string())
+                }
+                err => CustomError::new(500, format!("Unknown Database error: {}", err)),
             }
-            err => CustomError::new(500, format!("Unknown Database error: {}", err)),
         }
-      }
-  }
+    }
 }
 
 impl ResponseError for CustomError {
