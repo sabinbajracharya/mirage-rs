@@ -35,6 +35,9 @@ table! {
     }
 }
 
+joinable!(allows -> contents (pid_content));
+joinable!(contents -> endpoints (pid_endpoint));
+
 allow_tables_to_appear_in_same_query!(
     allows,
     apis,
