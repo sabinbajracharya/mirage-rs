@@ -2,7 +2,7 @@ use actix_web::{get, post, web, HttpResponse, Responder};
 use serde_json::json;
 
 use crate::error_handler::CustomError;
-use crate::models::{Endpoint, NewEndpoint, Content, NewContent};
+use crate::models::{Endpoint, NewEndpoint, Content, NewContent, Allow, NewAllow};
 
 #[post("/endpoint")]
 async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> Result<HttpResponse, CustomError> {
@@ -29,9 +29,23 @@ async fn get_all_content() -> Result<HttpResponse, CustomError> {
     Ok(HttpResponse::Ok().json(contents))
 }
 
+#[post("/allow")]
+async fn insert_allow(allow: web::Json<NewAllow>) -> Result<HttpResponse, CustomError> {
+    let response = Allow::create(allow.into_inner()).await?;
+    Ok(HttpResponse::Ok().json(response))
+}
+
+#[get("/allows")]
+async fn get_all_allow() -> Result<HttpResponse, CustomError> {
+    let allows = Allow::find_all().await?;
+    Ok(HttpResponse::Ok().json(allows))
+}
+
 pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(insert_endpoint);
     config.service(get_all_endpoints);
     config.service(insert_content);
     config.service(get_all_content);
+    config.service(insert_allow);
+    config.service(get_all_allow);
 }

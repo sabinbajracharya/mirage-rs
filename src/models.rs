@@ -54,6 +54,27 @@ pub struct NewContent {
     pub request_method: String,
 }
 
+#[derive(Serialize, Deserialize, Queryable)]
+pub struct Allow {
+    pub id: i32,
+    pub pid_endpoint: i32,
+    pub pid_content: i32,
+    pub status_code: i32,
+    pub request_method: String,
+    pub flag: i32,
+}
+
+#[derive(Serialize, Deserialize, Insertable)]
+#[table_name = "allows"]
+pub struct NewAllow {
+    pub pid_endpoint: i32,
+    pub pid_content: i32,
+    pub status_code: i32,
+    pub request_method: String,
+    #[serde(default)]
+    pub flag: i32,
+}
+
 impl Endpoint {
     pub async fn create(endpoint: NewEndpoint) -> Result<String, CustomError> {
 
@@ -102,7 +123,7 @@ impl Content {
                 .execute(&conn)
         }).await?;
 
-        Ok(String::from("Success!"))
+        Ok(String::from("1 row inserted!"))
     }
 
     pub async fn find_all() -> Result<Vec<Content>, CustomError> {
@@ -122,6 +143,42 @@ impl NewContent {
     fn from(content: NewContent) -> NewContent {
         NewContent {
             ..content
+        }
+    }
+}
+
+impl Allow {
+    pub async fn create(allow: NewAllow) -> Result<String, CustomError> {
+        let conn = connection().unwrap();
+
+        let newAllow = NewAllow::from(allow);
+        web::block(move || {
+            diesel::insert_into(allows::table)
+                .values(&newAllow)
+                .execute(&conn)
+        }).await?;
+
+        Ok("1 row inserted!".to_string())
+    }
+
+    pub async fn find_all() -> Result<Vec<Allow>, CustomError> {
+        use schema::allows::dsl::*;
+
+        let conn = connection().unwrap();
+
+        let results = web::block(move || {
+            allows.load::<Allow>(&conn)
+        }).await?;
+
+        Ok(results)
+    }
+}
+
+impl NewAllow {
+    fn from(allow: NewAllow) -> NewAllow {
+        NewAllow {
+            flag: 1,
+            ..allow
         }
     }
 }
