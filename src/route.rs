@@ -5,15 +5,16 @@ use crate::error_handler::CustomError;
 use crate::models::{Endpoint, NewEndpoint, Content, NewContent};
 
 #[post("/endpoint")]
-async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> impl Responder {
-    let new_endpoint = Endpoint::create(endpoint.into_inner()).await.unwrap();
-    HttpResponse::Ok().json(new_endpoint)
+async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> Result<HttpResponse, CustomError> {
+    let new_endpoint = Endpoint::create(endpoint.into_inner()).await?;
+    Ok(HttpResponse::Ok().json(new_endpoint))
 }
 
 #[get("/endpoints")]
-async fn get_all_endpoints() -> impl Responder {
-    let endpoints = Endpoint::find_all().await.unwrap();
-    HttpResponse::Ok().json(endpoints)
+async fn get_all_endpoints() -> Result<HttpResponse, CustomError>  {
+    let endpoints = Endpoint::find_all().await?;
+    Ok(HttpResponse::Ok().json(endpoints))
+
 }
 
 #[post("/content")]

@@ -55,7 +55,7 @@ pub struct NewContent {
 }
 
 impl Endpoint {
-    pub async fn create(endpoint: NewEndpoint) -> Result<String, Error> {
+    pub async fn create(endpoint: NewEndpoint) -> Result<String, CustomError> {
 
         let conn = connection().unwrap();
         let endpoint = NewEndpoint::from(endpoint);
@@ -64,8 +64,7 @@ impl Endpoint {
             diesel::insert_into(endpoints::table)
                 .values(&endpoint)
                 .execute(&conn)
-        }).await
-        .expect("Error inserting the endpoint!");
+        }).await?;
 
         Ok(format!("Inserted {} row in the db!", result))
     }
