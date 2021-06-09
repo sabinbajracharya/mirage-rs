@@ -14,7 +14,12 @@ async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> Result<HttpRespons
 async fn get_all_endpoints() -> Result<HttpResponse, CustomError>  {
     let endpoints = Endpoint::find_all().await?;
     Ok(HttpResponse::Ok().json(endpoints))
+}
 
+#[get("/endpoint/{id}/contents")]
+async fn get_all_content_from_endpoint_id(web::Path((id)): web::Path<(i32)>) -> Result<HttpResponse, CustomError> {
+    let response = Content::find_all_from_endpoint_id(id).await?;
+    Ok(HttpResponse::Ok().json(response))
 }
 
 #[post("/content")]
@@ -44,8 +49,11 @@ async fn get_all_allow() -> Result<HttpResponse, CustomError> {
 pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(insert_endpoint);
     config.service(get_all_endpoints);
+
     config.service(insert_content);
     config.service(get_all_content);
+    config.service(get_all_content_from_endpoint_id);
+
     config.service(insert_allow);
     config.service(get_all_allow);
 }

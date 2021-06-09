@@ -137,6 +137,20 @@ impl Content {
 
         Ok(results)
     }
+
+    pub async fn find_all_from_endpoint_id(arg_id: i32) -> Result<Vec<Content>, CustomError> {
+        use schema::contents::dsl::*;
+
+        let conn = connection().unwrap();
+
+        let results = web::block(move || {
+            contents
+            .filter(pid_endpoint.eq(arg_id))
+            .load::<Content>(&conn)
+        }).await?;
+
+        Ok(results)
+    }
 }
 
 impl NewContent {
