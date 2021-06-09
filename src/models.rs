@@ -54,6 +54,16 @@ pub struct NewContent {
     pub request_method: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ContentWithActiveState {
+    pub id: i32,
+    pub pid_endpoint: i32,
+    pub body: String,
+    pub status_code: i32,
+    pub request_method: String,
+    pub active: bool,
+}
+
 #[derive(Serialize, Deserialize, Queryable)]
 pub struct Allow {
     pub id: i32,
@@ -138,16 +148,29 @@ impl Content {
         Ok(results)
     }
 
-    pub async fn find_all_from_endpoint_id(arg_id: i32) -> Result<Vec<Content>, CustomError> {
+    pub async fn find_all_from_endpoint_id(arg_id: i32) -> Result<Vec<ContentWithActiveState>, CustomError> {
         use schema::contents::dsl::*;
 
         let conn = connection().unwrap();
 
         let results = web::block(move || {
             contents
+            .left_join(allows::table)
             .filter(pid_endpoint.eq(arg_id))
-            .load::<Content>(&conn)
+            .load::<(Content, Option<Allow>)>(&conn)
         }).await?;
+
+        let results: Vec<ContentWithActiveState> = results
+            .into_iter()
+            .map(|(item_content, item_allow)| ContentWithActiveState {
+                id              : item_content.id,
+                pid_endpoint    : item_content.pid_endpoint,
+                body            : item_content.body,
+                status_code     : item_content.status_code,
+                request_method  : item_content.request_method,
+                active          : !item_allow.is_none()
+            })
+            .collect();
 
         Ok(results)
     }
