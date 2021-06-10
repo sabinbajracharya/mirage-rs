@@ -1,9 +1,11 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
-use actix_files as fs;
 use serde_json::json;
 
 use crate::error_handler::CustomError;
 use crate::models::{Endpoint, NewEndpoint, Content, NewContent, Allow, NewAllow};
+
+use actix_web_static_files::ResourceFiles;
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[post("/endpoint")]
 async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> Result<HttpResponse, CustomError> {
@@ -65,5 +67,6 @@ pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(get_all_allow);
 
     config.service(show_dashboard);
-    config.service(fs::Files::new("/_app", "./static/_app").show_files_listing());
+    let generated = generate();
+    config.service(ResourceFiles::new("/_app", generated));
 }
