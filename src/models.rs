@@ -113,6 +113,19 @@ impl Endpoint {
 
         Ok(results)
     }
+
+    pub async fn delete(arg_id: i32) -> Result<String, CustomError> {
+        use schema::endpoints::dsl::*;
+
+        let conn = connection().unwrap();
+
+        web::block(move || {
+            diesel::delete(endpoints.filter(id.eq(arg_id)))
+                .execute(&conn)
+        }).await?;
+
+        Ok("The record has been deleted!".to_string())
+    }
 }
 
 impl NewEndpoint {

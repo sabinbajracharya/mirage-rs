@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, delete, web, HttpResponse, Responder};
 use serde_json::json;
 
 use crate::error_handler::CustomError;
@@ -17,6 +17,12 @@ async fn insert_endpoint(endpoint: web::Json<NewEndpoint>) -> Result<HttpRespons
 async fn get_all_endpoints() -> Result<HttpResponse, CustomError>  {
     let endpoints = Endpoint::find_all().await?;
     Ok(HttpResponse::Ok().json(endpoints))
+}
+
+#[delete("/endpoint/{id}")]
+async fn delete_endpoint(web::Path((id)): web::Path<(i32)>) -> Result<HttpResponse, CustomError> {
+    let response = Endpoint::delete(id).await?;
+    Ok(HttpResponse::Ok().json(response))
 }
 
 #[get("/endpoint/{id}/contents")]
@@ -58,6 +64,7 @@ async fn show_dashboard() -> Result<HttpResponse, CustomError> {
 pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(insert_endpoint);
     config.service(get_all_endpoints);
+    config.service(delete_endpoint);
 
     config.service(insert_content);
     config.service(get_all_content);
