@@ -1,4 +1,5 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_files as fs;
 use serde_json::json;
 
 use crate::error_handler::CustomError;
@@ -64,4 +65,5 @@ pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(get_all_allow);
 
     config.service(show_dashboard);
+    config.service(fs::Files::new("/_app", "./static/_app").show_files_listing());
 }
