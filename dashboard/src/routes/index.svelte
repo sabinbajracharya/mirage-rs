@@ -1,6 +1,7 @@
 <script >
     let is_loading = fetchEndpoints();
     let endpoints = [];
+    let new_endpoint = '';
 
     async function fetchEndpoints() {
         const res = await fetch('http://localhost:8080/endpoints');
@@ -22,6 +23,33 @@
             endpoints = [...endpoints.slice(0, endpoints.length - 1)];
         }
     }
+
+    async function add() {
+        if (!endpoints) {
+            return;
+        }
+        const res = await fetch('http://localhost:8080/endpoint', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify({
+                "path": new_endpoint
+            }),
+        });
+        if (res.status === 200) {
+            await fetchEndpoints();
+            new_endpoint = '';
+        } else {
+            try {
+                const json = await res.json();
+                alert(json.message);
+            } catch {
+                alert(`Error: ${res.status}`);
+            }
+
+        }
+    }
 </script>
 
 <h2 class="header"> Mirage.rs </h2>
@@ -30,16 +58,20 @@
     <p> ...loading </p>
 {:then}
     <div class="content">
-    <table>
-        <th>Endpoints</th>
-        <th></th>
-        {#each endpoints as item(item.id)}
-            <tr>
-                <td><span> <a href = "#" on:click={remove}>{item.path}</a></span></td>
-                <td><span > <a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
-            </tr>
-        {/each}
-    </table>
+        <div class="toolbar">
+            <input type="text" bind:value={new_endpoint} placeholder="/user/login">
+            <button on:click={add}>Add</button>
+        </div>
+        <table>
+            <th>Endpoints</th>
+            <th></th>
+            {#each endpoints as item(item.id)}
+                <tr>
+                    <td><span> <a href="#" on:click={remove}>{item.path}</a></span></td>
+                    <td><span > <a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
+                </tr>
+            {/each}
+        </table>
     </div>
 {:catch error}
     <p style="color: red">{error.message}</p>
@@ -58,6 +90,9 @@
         margin: auto;
         background: white;
         padding: 10px;
+    }
+    .toolbar {
+        padding: 16px 0px;
     }
     table {
         font-family: arial, sans-serif;
@@ -84,7 +119,7 @@
         }
 
         h1, h2 {
-            margin-top: 0 px;
+            margin-top: 0px;
         }
     </style>
 </svelte:head>
