@@ -1,6 +1,7 @@
 use actix_web::{web};
 use diesel::prelude::*;
-use diesel::result::Error;
+// use diesel::debug_query;
+// use diesel::*;
 use serde::{Deserialize, Serialize};
 
 use crate::error_handler::CustomError;
@@ -189,13 +190,55 @@ impl Allow {
         let conn = connection().unwrap();
 
         let newAllow = NewAllow::from(allow);
-        web::block(move || {
-            diesel::insert_into(allows::table)
+        let result = web::block(move || {
+            // The current of Diesel doesn't yet support upsert for SQLite
+            // The feature is implemented but not yet merged with stable release
+            // https://github.com/diesel-rs/diesel/issues/1854
+
+            // diesel::update(allows.find())
+            //     .values(&newAllow)
+            //     .on_conflict(id)
+            //     .do_update()
+            //     .set(&newAllow)
+            //     .execute(&conn)
+
+            use schema::allows::dsl::*;
+
+            let query_result = diesel::insert_into(allows)
                 .values(&newAllow)
-                .execute(&conn)
+                .execute(&conn);
+
+            match query_result {
+                Ok(value) => Ok("1 row inserted".to_string()),
+                Err(error) => {
+                    diesel::update(allows)
+                        .filter(pid_endpoint.eq(newAllow.pid_endpoint))
+                        .filter(request_method.eq(newAllow.request_method))
+                        .set((status_code.eq(newAllow.status_code), pid_content.eq(newAllow.pid_content)))
+                        .execute(&conn)?;
+                    Ok("1 row updated".to_string())
+                }
+            }
         }).await?;
 
-        Ok("1 row inserted!".to_string())
+        Ok(result)
+        // use schema::allows::dsl::*;
+        // match xxx {
+        //     Ok(s) => Ok(s),
+        //     Err(error) => Err(CustomError::from(error))
+        // }
+
+        // let target = allows
+        //     .filter(pid_endpoint.eq(newAllow.pid_endpoint))
+        //     .filter(request_method.eq(newAllow.request_method));
+        // let query = diesel::update(target)
+        //                 .set(flag.eq(1));
+
+
+        // let debug = debug_query::<diesel::sqlite::Sqlite, _>(&query);
+        // println!("Debug Query: {}", debug);
+
+        // Ok("1 row inserted!".to_string())
     }
 
     pub async fn find_all() -> Result<Vec<Allow>, CustomError> {
