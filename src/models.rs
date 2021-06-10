@@ -86,8 +86,13 @@ pub struct NewAllow {
     pub flag: i32,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct OkMessageResponse {
+    pub message: String,
+}
+
 impl Endpoint {
-    pub async fn create(endpoint: NewEndpoint) -> Result<String, CustomError> {
+    pub async fn create(endpoint: NewEndpoint) -> Result<OkMessageResponse, CustomError> {
 
         let conn = connection().unwrap();
         let endpoint = NewEndpoint::from(endpoint);
@@ -98,7 +103,9 @@ impl Endpoint {
                 .execute(&conn)
         }).await?;
 
-        Ok(format!("Inserted {} row in the db!", result))
+        Ok(OkMessageResponse {
+            message: format!("Inserted {} row in the db!", result),
+        })
     }
 
     pub async fn find_all() -> Result<Vec<Endpoint>, CustomError> {
@@ -114,7 +121,7 @@ impl Endpoint {
         Ok(results)
     }
 
-    pub async fn delete(arg_id: i32) -> Result<String, CustomError> {
+    pub async fn delete(arg_id: i32) -> Result<OkMessageResponse, CustomError> {
         use schema::endpoints::dsl::*;
 
         let conn = connection().unwrap();
@@ -124,7 +131,9 @@ impl Endpoint {
                 .execute(&conn)
         }).await?;
 
-        Ok("The record has been deleted!".to_string())
+        Ok(OkMessageResponse {
+            message: "The record has been deleted!".to_string(),
+        })
     }
 }
 
@@ -137,7 +146,7 @@ impl NewEndpoint {
 }
 
 impl Content {
-    pub async fn create(content: NewContent) -> Result<String, CustomError> {
+    pub async fn create(content: NewContent) -> Result<OkMessageResponse, CustomError> {
         let conn = connection().unwrap();
         let new_content = NewContent::from(content);
 
@@ -147,7 +156,9 @@ impl Content {
                 .execute(&conn)
         }).await?;
 
-        Ok(String::from("1 row inserted!"))
+        Ok(OkMessageResponse {
+            message: "1 row inserted!".to_string(),
+        })
     }
 
     pub async fn find_all() -> Result<Vec<Content>, CustomError> {
@@ -199,7 +210,7 @@ impl NewContent {
 }
 
 impl Allow {
-    pub async fn create(allow: NewAllow) -> Result<String, CustomError> {
+    pub async fn create(allow: NewAllow) -> Result<OkMessageResponse, CustomError> {
         let conn = connection().unwrap();
 
         let newAllow = NewAllow::from(allow);
@@ -222,14 +233,18 @@ impl Allow {
                 .execute(&conn);
 
             match query_result {
-                Ok(value) => Ok("1 row inserted".to_string()),
+                Ok(value) => Ok(OkMessageResponse {
+                    message: "1 row inserted!".to_string(),
+                }),
                 Err(error) => {
                     diesel::update(allows)
                         .filter(pid_endpoint.eq(newAllow.pid_endpoint))
                         .filter(request_method.eq(newAllow.request_method))
                         .set((status_code.eq(newAllow.status_code), pid_content.eq(newAllow.pid_content)))
                         .execute(&conn)?;
-                    Ok("1 row updated".to_string())
+                    Ok(OkMessageResponse {
+                        message: "1 row updated!".to_string(),
+                    })
                 }
             }
         }).await?;
