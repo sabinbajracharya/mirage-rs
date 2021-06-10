@@ -1,4 +1,4 @@
-<script>
+<script >
     let is_loading = fetchEndpoints();
     let endpoints = [];
 
@@ -6,14 +6,13 @@
         const res = await fetch('http://localhost:8080/endpoints');
         const json = await res.json();
 
-		if (res.ok) {
+        if (res.ok) {
             endpoints = json;
-            console.log(endpoints);
-			return json;
-		} else {
-			throw new Error(json);
-		}
-	}
+            return json;
+        } else {
+            throw new Error(json);
+        }
+    }
 
     async function remove(id) {
         const res = await fetch(`http://localhost:8080/endpoint/${id}`, {
@@ -25,29 +24,28 @@
     }
 </script>
 
-<h2 class="header">Mirage.rs</h2>
+<h2 class="header"> Mirage.rs </h2>
 
 {#await is_loading}
-	<p>...loading</p>
+    <p> ...loading </p>
 {:then}
     <div class="content">
-        <table>
-            <th>Endpoints</th>
-            <th></th>
-            {#each endpoints as item (item.id)}
-                <tr>
-                    <td><span><a href="#" on:click={remove}>{item.path}</a></span></td>
-                    <td><span><a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
-                </tr>
-            {/each}
-        </table>
+    <table>
+        <th>Endpoints</th>
+        <th></th>
+        {#each endpoints as item(item.id)}
+            <tr>
+                <td><span> <a href = "#" on:click={remove}>{item.path}</a></span></td>
+                <td><span > <a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
+            </tr>
+        {/each}
+    </table>
     </div>
 {:catch error}
-	<p style="color: red">{error.message}</p>
+    <p style="color: red">{error.message}</p>
 {/await}
 
-
-<style>
+<style >
     .header {
         padding: 8px;
         background-color: slategrey;
@@ -79,14 +77,14 @@
 </style>
 
 <svelte:head>
-	<style>
+    <style>
         body {
             margin: 0px;
             padding: 0px;
         }
 
         h1, h2 {
-            margin-top: 0px;
+            margin-top: 0 px;
         }
     </style>
 </svelte:head>
