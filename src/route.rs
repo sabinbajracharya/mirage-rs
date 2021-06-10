@@ -46,6 +46,12 @@ async fn get_all_allow() -> Result<HttpResponse, CustomError> {
     Ok(HttpResponse::Ok().json(allows))
 }
 
+#[get("/dashboard")]
+async fn show_dashboard() -> Result<HttpResponse, CustomError> {
+    Ok(HttpResponse::Ok()
+        .body(include_str!("../static/index.html")))
+}
+
 pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(insert_endpoint);
     config.service(get_all_endpoints);
@@ -56,4 +62,6 @@ pub fn init_routes(config: &mut web::ServiceConfig) {
 
     config.service(insert_allow);
     config.service(get_all_allow);
+
+    config.service(show_dashboard);
 }
