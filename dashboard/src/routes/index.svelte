@@ -25,7 +25,9 @@
     }
 
     async function add() {
-        if (!endpoints) {
+        new_endpoint = format(new_endpoint);
+
+        if (new_endpoint.length === 0) {
             return;
         }
         const res = await fetch('http://localhost:8080/endpoint', {
@@ -50,6 +52,24 @@
 
         }
     }
+
+    function format(path) {
+        let new_path = path.replace(/\s/g, "");
+        if (new_path.length > 0) {
+            const beginsWithSlash = new_path[0] === "/";
+            if (!beginsWithSlash) {
+                new_path = `/${new_path}`;
+            }
+
+            if (new_path.length > 1) {
+                const endsWithSlash = new_path[new_path.length - 1] === "/";
+                if (endsWithSlash) {
+                    new_path = new_path.slice(0, new_path.length - 1);
+                }
+            }
+        }
+        return new_path;
+    }
 </script>
 
 <h2 class="header"> Mirage.rs </h2>
@@ -59,8 +79,10 @@
 {:then}
     <div class="content">
         <div class="toolbar">
-            <input type="text" bind:value={new_endpoint} placeholder="/user/login">
-            <button on:click={add}>Add</button>
+            <form on:submit|preventDefault={add}>
+                <input type="text" bind:value={new_endpoint} placeholder="/user/login">
+                <button type="submit">Add</button>
+            </form>
         </div>
         <table>
             <th>Endpoints</th>
