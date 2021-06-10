@@ -24,6 +24,10 @@
         }
     }
 
+    async function edit(id) {
+
+    }
+
     async function add() {
         new_endpoint = format(new_endpoint);
 
@@ -86,10 +90,11 @@
         </div>
         <table>
             <th>Endpoints</th>
-            <th></th>
+            <th colspan="2">Actions</th>
             {#each endpoints as item(item.id)}
                 <tr>
                     <td><span> <a href="#" on:click={remove}>{item.path}</a></span></td>
+                    <td><span > <a href="#" on:click={() => edit(item.id)}>Edit</a></span></td>
                     <td><span > <a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
                 </tr>
             {/each}
