@@ -77,13 +77,10 @@
         return new_path;
     }
 </script>
-
-<h2 class="header"> Mirage.rs </h2>
-
-{#await is_loading}
-    <p> ...loading </p>
-{:then}
-    <div class="content">
+<div class="content">
+    {#await is_loading}
+        <p> ...loading </p>
+    {:then}
         <div class="toolbar">
             <form on:submit|preventDefault={add}>
                 <input type="text" bind:value={new_endpoint} placeholder="/user/login">
@@ -101,28 +98,16 @@
                 </tr>
             {/each}
         </table>
-    </div>
-{:catch error}
-    <p style="color: red">{error.message}</p>
-{/await}
+    {:catch error}
+        <p style="color: red">{error.message}</p>
+    {/await}
+</div>
 
-<style >
-    .header {
-        padding: 8px;
-        background-color: slategrey;
-        font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        color: white;
-    }
-    .content {
-        font-family: "Roboto";
-        max-width: 1024px;
-        margin: auto;
-        background: white;
-        padding: 10px;
-    }
+<style>
     .toolbar {
         padding: 16px 0px;
     }
+
     table {
         font-family: arial, sans-serif;
         border-collapse: collapse;
@@ -139,16 +124,3 @@
         background-color: #eeeeee;
     }
 </style>
-
-<svelte:head>
-    <style>
-        body {
-            margin: 0px;
-            padding: 0px;
-        }
-
-        h1, h2 {
-            margin-top: 0px;
-        }
-    </style>
-</svelte:head>
