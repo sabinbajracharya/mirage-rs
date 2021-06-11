@@ -1,4 +1,6 @@
 <script >
+    import { base } from '$app/paths';
+
     let is_loading = fetchEndpoints();
     let endpoints = [];
     let new_endpoint = '';
@@ -93,7 +95,7 @@
             <th colspan="2">Actions</th>
             {#each endpoints as item(item.id)}
                 <tr>
-                    <td><span> <a href="#" on:click={remove}>{item.path}</a></span></td>
+                    <td><span> <a href="{base}/endpoint/{item.id}">{item.path}</a></span></td>
                     <td><span > <a href="#" on:click={() => edit(item.id)}>Edit</a></span></td>
                     <td><span > <a href="#" on:click={() => remove(item.id)}>Delete</a></span></td>
                 </tr>
