@@ -55,7 +55,6 @@ async fn get_all_allow() -> Result<HttpResponse, CustomError> {
     Ok(HttpResponse::Ok().json(allows))
 }
 
-#[get("/dashboard")]
 async fn show_dashboard() -> Result<HttpResponse, CustomError> {
     Ok(HttpResponse::Ok()
         .body(include_str!("../static/index.html")))
@@ -73,7 +72,14 @@ pub fn init_routes(config: &mut web::ServiceConfig) {
     config.service(insert_allow);
     config.service(get_all_allow);
 
-    config.service(show_dashboard);
     let generated = generate();
-    config.service(ResourceFiles::new("/_app", generated));
+    config.service(ResourceFiles::new("/dashboard/_app", generated));
+
+    config.service(
+        web::scope("/dashboard")
+            .default_service(
+                web::route()
+                    .to(|| show_dashboard()),
+            )
+    );
 }
